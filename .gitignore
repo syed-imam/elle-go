@@ -24,3 +24,7 @@ go.work.sum
 
 # Local reference clones (kept as sibling ../elle-upstream, but ignore if copied in)
 /reference/
+
+# Local design docs — keep unpublished until ready (remove these lines to publish)
+/docs/DESIGN.md
+/docs/ROADMAP.md
