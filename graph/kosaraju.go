@@ -52,10 +52,5 @@ func (g *Graph) SCCs() [][]int {
 }
 
 func (g *Graph) HasCycle() bool {
-	for _, comp := range g.SCCs() {
-		if len(comp) > 1 {
-			return true
-		}
-	}
-	return false
+	return g.FindCycle() != nil
 }
