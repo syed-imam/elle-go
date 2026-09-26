@@ -115,6 +115,71 @@ func TestEdgeRel(t *testing.T) {
 	}
 }
 
+func TestFilter(t *testing.T) {
+	g := New()
+	g.AddEdge(1, 2, WR)
+	g.AddEdge(2, 1, WW)
+
+	if g.Filter(WW).FindCycle() != nil {
+		t.Error("Filter(WW): no ww-only cycle should exist here")
+	}
+	if g.Filter(WW|WR).FindCycle() == nil {
+		t.Error("Filter(WW|WR): a ww/wr cycle should exist")
+	}
+
+	pure := New()
+	pure.AddEdge(1, 2, WW)
+	pure.AddEdge(2, 1, WW)
+	if pure.Filter(WW).FindCycle() == nil {
+		t.Error("Filter(WW): ww-only cycle should be found")
+	}
+}
+
+func TestReachable(t *testing.T) {
+	g := New()
+	g.AddEdge(1, 2, WW)
+	g.AddEdge(2, 3, WR)
+	g.AddEdge(3, 4, RW)
+
+	if !g.Reachable(1, 3, WW|WR) {
+		t.Error("1 should reach 3 via ww/wr")
+	}
+	if g.Reachable(1, 4, WW|WR) {
+		t.Error("1 should not reach 4 without crossing the rw edge")
+	}
+	if !g.Reachable(1, 4, WW|WR|RW) {
+		t.Error("1 should reach 4 when rw is allowed")
+	}
+
+	c := New()
+	c.AddEdge(1, 2, WW)
+	c.AddEdge(2, 1, WR)
+	if !c.Reachable(1, 1, WW|WR) {
+		t.Error("1 should reach itself around a ww/wr cycle")
+	}
+}
+
+func TestEdgesWith(t *testing.T) {
+	g := New()
+	g.AddEdge(1, 2, WW)
+	g.AddEdge(2, 3, RW)
+	g.AddEdge(3, 1, RW)
+	g.AddEdge(3, 1, WR)
+
+	rw := g.EdgesWith(RW)
+	if len(rw) != 2 {
+		t.Fatalf("EdgesWith(RW) = %v, want 2 edges", rw)
+	}
+	if !slices.Contains(rw, [2]int{2, 3}) || !slices.Contains(rw, [2]int{3, 1}) {
+		t.Errorf("EdgesWith(RW) = %v, want [2 3] and [3 1]", rw)
+	}
+
+	ww := g.EdgesWith(WW)
+	if len(ww) != 1 || ww[0] != [2]int{1, 2} {
+		t.Errorf("EdgesWith(WW) = %v, want [[1 2]]", ww)
+	}
+}
+
 func TestFinishOrder(t *testing.T) {
 	g := New()
 	g.AddEdge(1, 2, WW)
