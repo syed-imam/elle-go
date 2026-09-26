@@ -7,8 +7,8 @@ import (
 
 func TestNodes(t *testing.T) {
 	g := New()
-	g.AddEdge(1, 2)
-	g.AddEdge(2, 3)
+	g.AddEdge(1, 2, WW)
+	g.AddEdge(2, 3, WW)
 
 	got := g.nodes()
 	slices.Sort(got)
@@ -19,8 +19,8 @@ func TestNodes(t *testing.T) {
 
 func TestReverse(t *testing.T) {
 	g := New()
-	g.AddEdge(1, 2)
-	g.AddEdge(2, 3)
+	g.AddEdge(1, 2, WW)
+	g.AddEdge(2, 3, WW)
 
 	r := g.reverse()
 	if !slices.Equal(r.adj[2], []int{1}) {
@@ -33,11 +33,11 @@ func TestReverse(t *testing.T) {
 
 func TestSCCs(t *testing.T) {
 	g := New()
-	g.AddEdge(1, 2)
-	g.AddEdge(2, 3)
-	g.AddEdge(3, 1)
-	g.AddEdge(3, 4)
-	g.AddEdge(4, 5)
+	g.AddEdge(1, 2, WW)
+	g.AddEdge(2, 3, WW)
+	g.AddEdge(3, 1, WW)
+	g.AddEdge(3, 4, WW)
+	g.AddEdge(4, 5, WW)
 
 	comps := g.SCCs()
 	if len(comps) != 3 {
@@ -58,25 +58,68 @@ func TestSCCs(t *testing.T) {
 
 func TestHasCycleUnit(t *testing.T) {
 	acyclic := New()
-	acyclic.AddEdge(1, 2)
-	acyclic.AddEdge(2, 3)
+	acyclic.AddEdge(1, 2, WW)
+	acyclic.AddEdge(2, 3, WW)
 	if acyclic.HasCycle() {
 		t.Error("acyclic graph reported a cycle")
 	}
 
 	cyclic := New()
-	cyclic.AddEdge(1, 2)
-	cyclic.AddEdge(2, 1)
+	cyclic.AddEdge(1, 2, WW)
+	cyclic.AddEdge(2, 1, WW)
 	if !cyclic.HasCycle() {
 		t.Error("cyclic graph reported no cycle")
 	}
 }
 
+func TestFindCycle(t *testing.T) {
+	acyclic := New()
+	acyclic.AddEdge(1, 2, WW)
+	acyclic.AddEdge(2, 3, WW)
+	if c := acyclic.FindCycle(); c != nil {
+		t.Errorf("acyclic graph returned cycle %v", c)
+	}
+
+	cyclic := New()
+	cyclic.AddEdge(1, 2, WW)
+	cyclic.AddEdge(2, 3, WW)
+	cyclic.AddEdge(3, 1, WW)
+	cyclic.AddEdge(3, 4, WW)
+
+	got := cyclic.FindCycle()
+	if len(got) < 2 {
+		t.Fatalf("cycle = %v, want a closed loop", got)
+	}
+	for i := range got {
+		next := got[(i+1)%len(got)]
+		if !slices.Contains(cyclic.adj[got[i]], next) {
+			t.Errorf("cycle %v: no edge %d->%d", got, got[i], next)
+		}
+	}
+}
+
+func TestEdgeRel(t *testing.T) {
+	g := New()
+	g.AddEdge(1, 2, WW)
+	g.AddEdge(1, 2, WR)
+
+	got := g.EdgeRel(1, 2)
+	if got&WW == 0 || got&WR == 0 {
+		t.Errorf("EdgeRel(1,2) = %b, want WW and WR set", got)
+	}
+	if got&RW != 0 {
+		t.Errorf("EdgeRel(1,2) = %b, should not have RW", got)
+	}
+	if g.EdgeRel(2, 1) != 0 {
+		t.Errorf("EdgeRel(2,1) = %b, want empty", g.EdgeRel(2, 1))
+	}
+}
+
 func TestFinishOrder(t *testing.T) {
 	g := New()
-	g.AddEdge(1, 2)
-	g.AddEdge(2, 3)
-	g.AddEdge(1, 3)
+	g.AddEdge(1, 2, WW)
+	g.AddEdge(2, 3, WW)
+	g.AddEdge(1, 3, WW)
 
 	pos := map[int]int{}
 	for i, n := range g.finishOrder() {
