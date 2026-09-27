@@ -180,6 +180,23 @@ func TestEdgesWith(t *testing.T) {
 	}
 }
 
+func TestPath(t *testing.T) {
+	g := New()
+	g.AddEdge(1, 2, WW)
+	g.AddEdge(2, 3, WR)
+	g.AddEdge(3, 4, RW)
+
+	if p := g.Path(1, 3, WW|WR); !slices.Equal(p, []int{1, 2, 3}) {
+		t.Errorf("Path(1,3,ww|wr) = %v, want [1 2 3]", p)
+	}
+	if p := g.Path(1, 4, WW|WR); p != nil {
+		t.Errorf("Path(1,4,ww|wr) = %v, want nil (rw edge excluded)", p)
+	}
+	if p := g.Path(1, 4, WW|WR|RW); !slices.Equal(p, []int{1, 2, 3, 4}) {
+		t.Errorf("Path(1,4,all) = %v, want [1 2 3 4]", p)
+	}
+}
+
 func TestFinishOrder(t *testing.T) {
 	g := New()
 	g.AddEdge(1, 2, WW)
