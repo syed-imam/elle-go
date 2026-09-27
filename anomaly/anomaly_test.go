@@ -68,3 +68,72 @@ func TestClassifyFixtures(t *testing.T) {
 		t.Errorf("serializable: Classify = %v, want None", got)
 	}
 }
+
+func isClosedCycle(g *graph.Graph, c []int) bool {
+	if len(c) < 2 {
+		return false
+	}
+	for i := range c {
+		if g.EdgeRel(c[i], c[(i+1)%len(c)]) == 0 {
+			return false
+		}
+	}
+	return true
+}
+
+func TestCheckWitnessCycle(t *testing.T) {
+	cases := []struct {
+		name    string
+		build   func(*graph.Graph)
+		anomaly Anomaly
+	}{
+		{"g0", func(g *graph.Graph) {
+			g.AddEdge(1, 2, graph.WW)
+			g.AddEdge(2, 1, graph.WW)
+		}, G0},
+		{"g1c", func(g *graph.Graph) {
+			g.AddEdge(1, 2, graph.WR)
+			g.AddEdge(2, 1, graph.WW)
+		}, G1c},
+		{"gsingle", func(g *graph.Graph) {
+			g.AddEdge(1, 2, graph.RW)
+			g.AddEdge(2, 1, graph.WW)
+		}, GSingle},
+		{"g2", func(g *graph.Graph) {
+			g.AddEdge(1, 2, graph.RW)
+			g.AddEdge(2, 1, graph.RW)
+		}, G2},
+	}
+	for _, c := range cases {
+		g := graph.New()
+		c.build(g)
+		v := Check(g)
+		if v.Anomaly != c.anomaly {
+			t.Errorf("%s: Anomaly = %v, want %v", c.name, v.Anomaly, c.anomaly)
+		}
+		if v.Level != Requires(c.anomaly) {
+			t.Errorf("%s: Level = %v, want %v", c.name, v.Level, Requires(c.anomaly))
+		}
+		if !isClosedCycle(g, v.Cycle) {
+			t.Errorf("%s: Cycle %v is not a closed loop", c.name, v.Cycle)
+		}
+	}
+
+	g := graph.New()
+	g.AddEdge(1, 2, graph.WW)
+	if v := Check(g); v.Anomaly != None || v.Cycle != nil {
+		t.Errorf("acyclic: got %v cycle %v, want None nil", v.Anomaly, v.Cycle)
+	}
+}
+
+func TestVerdictString(t *testing.T) {
+	if s := (Verdict{Anomaly: None}).String(); s != "no anomaly found" {
+		t.Errorf("None.String() = %q, want %q", s, "no anomaly found")
+	}
+
+	v := Verdict{Anomaly: G2, Level: Serializable, Cycle: []int{0, 1}}
+	want := "G2: transactions 0 → 1 → 0 (requires serializable or stronger)"
+	if got := v.String(); got != want {
+		t.Errorf("String() = %q, want %q", got, want)
+	}
+}
