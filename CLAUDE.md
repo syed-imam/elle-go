@@ -62,6 +62,37 @@ Standard Go tooling applies:
 
 ## Architecture
 
-_To be documented once source files exist._ Focus this section on the
-"big picture" that requires reading multiple files to understand — not a
-file-by-file listing.
+The checker is a pipeline; data flows through four packages:
+
+    history → listappend → graph → anomaly
+
+- `history` — the data model. A `History` is an ordered slice of `Op`
+  (transactions); each `Op` has `Mops` (micro-ops: `Append` or `Read` on a
+  named key). An op's index is its transaction identity throughout the pipeline.
+- `listappend` — the workload logic. `VersionOrder` recovers each key's write
+  order from list reads; `Dependencies` infers the ww/wr/rw `Edge`s between
+  transactions from that order. This is where list-append's "a read recovers the
+  full version order of a key" property is exploited.
+- `graph` — a generic directed multigraph with **typed edges** (`Rel`, a bitset
+  of ww/wr/rw). Nodes are transaction indices; the rel lives on the edge, never
+  the node. Provides the cycle/anomaly primitives: `FindCycle` (returns a
+  witness cycle path, not just a bool), `SCCs` (Kosaraju), and the typed-search
+  building blocks `Filter`, `Reachable`, `Path`, `EdgesWith`.
+- `anomaly` — classification. `Check` runs **typed search** in severity order →
+  a `Verdict{Anomaly, Level, Cycle}`. `Requires` maps the anomaly to the formal
+  isolation level that prevents it; `Verdict.String` renders the English verdict.
+
+Key design decisions (rationale in `DESIGN.md`):
+
+- **Typed search, not label-a-witness.** Each anomaly is found by directed
+  search for its own edge-shape, so the verdict is order-independent. G0 = a
+  cycle in the ww-only subgraph; G1c / G-single = an offending wr / rw edge
+  closed by a ww/wr return `Path`; G2 = the catch-all cycle.
+- **Edge types on edges, not nodes.** ww/wr/rw names a *relationship between two
+  transactions*, so it can only live on an edge. Mirrors Elle's BitRels.
+- **Formal isolation levels only.** `Level` is the Adya/ANSI hierarchy;
+  translating to a vendor's (often mislabeled) level names is kept separate.
+
+Not yet wired (see `ROADMAP.md`): there is no production `Check(history) →
+Result` façade — the history→graph build currently lives only in test helpers.
+That glue, real error handling, and the exported API are M3.
