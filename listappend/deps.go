@@ -11,7 +11,9 @@ func Dependencies(h history.History) []Edge {
 		for i := 0; i+1 < len(order); i++ {
 			from := writers[key][order[i]]
 			to := writers[key][order[i+1]]
-			edges = append(edges, Edge{From: from, To: to, Type: WW})
+			if from != to {
+				edges = append(edges, Edge{From: from, To: to, Type: WW})
+			}
 		}
 	}
 

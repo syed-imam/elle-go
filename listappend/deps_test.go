@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"elle-go/fixtures"
+	"elle-go/history"
 )
 
 func has(edges []Edge, from, to int, t EdgeType) bool {
@@ -29,6 +30,19 @@ func TestWriteSkewHasCycle(t *testing.T) {
 	edges := Dependencies(fixtures.WriteSkew())
 	if !has(edges, 0, 1, RW) || !has(edges, 1, 0, RW) {
 		t.Errorf("expected rw cycle 0<->1, got %v", edges)
+	}
+}
+
+func TestNoSelfWW(t *testing.T) {
+	h := history.History{
+		{Process: 1, Type: history.Ok, Mops: []history.Mop{
+			{Type: history.Append, Key: "x", App: 1},
+			{Type: history.Append, Key: "x", App: 2},
+		}},
+	}
+	edges := Dependencies(h)
+	if has(edges, 0, 0, WW) {
+		t.Errorf("expected no self ww edge, got %v", edges)
 	}
 }
 
