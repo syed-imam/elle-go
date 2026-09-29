@@ -69,3 +69,32 @@ func TestParityGenerated(t *testing.T) {
 		t.Logf("seed %d: agree — both valid", seed)
 	}
 }
+
+func TestParityWriteSkew(t *testing.T) {
+	if os.Getenv("ELLE_PARITY") == "" {
+		t.Skip("set ELLE_PARITY=1 to run the Elle differential test (slow: JVM per history)")
+	}
+	if !ElleAvailable() {
+		t.Skip("lein or ../../elle-upstream not available; skipping Elle differential test")
+	}
+	cfg := generator.Config{Keys: []string{"x", "y", "z"}}
+	for seed := int64(0); seed < 5; seed++ {
+		h := generator.WriteSkew(cfg, seed)
+		elle, err := RunElle(h)
+		if err != nil {
+			t.Fatalf("seed %d: RunElle: %v", seed, err)
+		}
+		ours := Verdict(h)
+		if ours.Anomaly == anomaly.None || !elle.Violation() {
+			t.Errorf("seed %d: expected both to flag a violation: elle valid?=%q %v vs ours=%v",
+				seed, elle.ValidField, elle.AnomalyTypes, ours)
+			continue
+		}
+		if !TypeAgrees(ours.Anomaly, elle.AnomalyTypes) {
+			t.Errorf("seed %d: type disagreement: ours=%v vs elle=%v",
+				seed, ours.Anomaly, elle.AnomalyTypes)
+			continue
+		}
+		t.Logf("seed %d: agree — ours=%v, elle=%v", seed, ours.Anomaly, elle.AnomalyTypes)
+	}
+}

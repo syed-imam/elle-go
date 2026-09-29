@@ -1,0 +1,22 @@
+package differential
+
+import (
+	"testing"
+
+	"elle-go/anomaly"
+)
+
+func TestTypeAgrees(t *testing.T) {
+	if !TypeAgrees(anomaly.G2, []string{"G2-item"}) {
+		t.Error("G2 should agree with [G2-item]")
+	}
+	if !TypeAgrees(anomaly.None, nil) {
+		t.Error("None should agree with no elle types")
+	}
+	if TypeAgrees(anomaly.G2, []string{"G1c"}) {
+		t.Error("G2 should not agree with [G1c]")
+	}
+	if TypeAgrees(anomaly.None, []string{"G2-item"}) {
+		t.Error("None should not agree when elle reports a type")
+	}
+}
