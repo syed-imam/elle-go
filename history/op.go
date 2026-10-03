@@ -10,7 +10,7 @@ const (
 )
 
 type Op struct {
-	Process int
-	Type    OpType
-	Mops    []Mop
+	Process int    `json:"process"`
+	Type    OpType `json:"type"`
+	Mops    []Mop  `json:"mops"`
 }

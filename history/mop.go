@@ -8,8 +8,8 @@ const (
 )
 
 type Mop struct {
-	Type MopType
-	Key  string
-	App  int
-	Read []int
+	Type MopType `json:"type"`
+	Key  string  `json:"key"`
+	App  int     `json:"app"`
+	Read []int   `json:"read"`
 }
