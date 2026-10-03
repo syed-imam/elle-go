@@ -1,0 +1,14 @@
+{
+  "name": "elle-go",
+  "owner": {
+    "name": "Syed Imam"
+  },
+  "description": "Serializability checking for transactional code, powered by elle-go.",
+  "plugins": [
+    {
+      "name": "elle-go",
+      "source": "./plugin",
+      "description": "Check transactional code for serializability anomalies against a throwaway Postgres."
+    }
+  ]
+}
