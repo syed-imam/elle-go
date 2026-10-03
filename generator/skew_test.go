@@ -46,3 +46,13 @@ func TestWriteCycleIsG0(t *testing.T) {
 		}
 	}
 }
+
+func TestDivergentReadsIsIncompatibleOrder(t *testing.T) {
+	cfg := Config{Keys: []string{"x", "y", "z"}}
+	for seed := int64(0); seed < 200; seed++ {
+		h := DivergentReads(cfg, seed)
+		if v, err := differential.Verdict(h); err != nil || v.Anomaly != anomaly.IncompatibleOrder {
+			t.Fatalf("seed %d: expected incompatible-order, got %v (err %v)", seed, v.Anomaly, err)
+		}
+	}
+}

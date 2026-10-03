@@ -20,3 +20,9 @@ func TestTypeAgrees(t *testing.T) {
 		t.Error("None should not agree when elle reports a type")
 	}
 }
+
+func TestTypeAgreesIncompatibleOrder(t *testing.T) {
+	if !TypeAgrees(anomaly.IncompatibleOrder, []string{"G0", "incompatible-order"}) {
+		t.Error("IncompatibleOrder should agree with [G0 incompatible-order]")
+	}
+}

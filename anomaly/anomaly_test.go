@@ -136,4 +136,10 @@ func TestVerdictString(t *testing.T) {
 	if got := v.String(); got != want {
 		t.Errorf("String() = %q, want %q", got, want)
 	}
+
+	v = IncompatibleOrderVerdict("x", []int{1, 2}, []int{2, 1})
+	want = `incompatible-order: key "x" read as [1 2] and [2 1], which no single order of appends explains (requires read committed or stronger)`
+	if got := v.String(); got != want {
+		t.Errorf("String() = %q, want %q", got, want)
+	}
 }

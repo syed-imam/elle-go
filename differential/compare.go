@@ -12,6 +12,8 @@ func elleName(a anomaly.Anomaly) string {
 		return "G-single-item"
 	case anomaly.G2:
 		return "G2-item"
+	case anomaly.IncompatibleOrder:
+		return "incompatible-order"
 	default:
 		return ""
 	}
