@@ -26,3 +26,17 @@ func TestRun(t *testing.T) {
 		})
 	}
 }
+
+func TestRunPGBadArgs(t *testing.T) {
+	cases := [][]string{
+		{"pg", "-isolation", "snapshot", "-dsn", "x"},
+		{"pg", "-dsn", ""},
+		{"pg", "-nope"},
+	}
+	for _, args := range cases {
+		var out, errOut bytes.Buffer
+		if got := run(args, strings.NewReader(""), &out, &errOut); got != 2 {
+			t.Errorf("%v: exit %d, want 2 (stderr %q)", args, got, errOut.String())
+		}
+	}
+}

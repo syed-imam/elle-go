@@ -16,6 +16,9 @@ func main() {
 }
 
 func run(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
+	if len(args) > 0 && args[0] == "pg" {
+		return runPG(args[1:], stdout, stderr)
+	}
 	in := stdin
 	if len(args) > 0 {
 		f, err := os.Open(args[0])

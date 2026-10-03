@@ -27,9 +27,6 @@ func openTestDB(t *testing.T) *sql.DB {
 	if err := Setup(ctx, db); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := db.ExecContext(ctx, `TRUNCATE lists`); err != nil {
-		t.Fatal(err)
-	}
 	return db
 }
 
