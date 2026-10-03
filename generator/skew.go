@@ -40,3 +40,35 @@ func WriteSkew(cfg Config, seed int64) history.History {
 		}},
 	}
 }
+
+func CircularInformationFlow(cfg Config, seed int64) history.History {
+	kx, ky := keyPair(cfg, seed)
+	return history.History{
+		{Process: 1, Type: history.Ok, Mops: []history.Mop{
+			{Type: history.Append, Key: kx, App: 1},
+			{Type: history.Read, Key: ky, Read: []int{2}},
+		}},
+		{Process: 2, Type: history.Ok, Mops: []history.Mop{
+			{Type: history.Append, Key: ky, App: 2},
+			{Type: history.Read, Key: kx, Read: []int{1}},
+		}},
+	}
+}
+
+func WriteCycle(cfg Config, seed int64) history.History {
+	kx, ky := keyPair(cfg, seed)
+	return history.History{
+		{Process: 1, Type: history.Ok, Mops: []history.Mop{
+			{Type: history.Append, Key: kx, App: 1},
+			{Type: history.Append, Key: ky, App: 1},
+		}},
+		{Process: 2, Type: history.Ok, Mops: []history.Mop{
+			{Type: history.Append, Key: kx, App: 2},
+			{Type: history.Append, Key: ky, App: 2},
+		}},
+		{Process: 3, Type: history.Ok, Mops: []history.Mop{
+			{Type: history.Read, Key: kx, Read: []int{1, 2}},
+			{Type: history.Read, Key: ky, Read: []int{2, 1}},
+		}},
+	}
+}

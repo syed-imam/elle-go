@@ -26,3 +26,23 @@ func TestWriteSkewIsG2(t *testing.T) {
 		}
 	}
 }
+
+func TestCircularInformationFlowIsG1c(t *testing.T) {
+	cfg := Config{Keys: []string{"x", "y", "z"}}
+	for seed := int64(0); seed < 200; seed++ {
+		h := CircularInformationFlow(cfg, seed)
+		if v := differential.Verdict(h); v.Anomaly != anomaly.G1c {
+			t.Fatalf("seed %d: expected G1c, got %v (cycle %v)", seed, v.Anomaly, v.Cycle)
+		}
+	}
+}
+
+func TestWriteCycleIsG0(t *testing.T) {
+	cfg := Config{Keys: []string{"x", "y", "z"}}
+	for seed := int64(0); seed < 200; seed++ {
+		h := WriteCycle(cfg, seed)
+		if v := differential.Verdict(h); v.Anomaly != anomaly.G0 {
+			t.Fatalf("seed %d: expected G0, got %v (cycle %v)", seed, v.Anomaly, v.Cycle)
+		}
+	}
+}
