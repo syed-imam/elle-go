@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -26,6 +27,7 @@ func runPG(args []string, stdout, stderr io.Writer) int {
 	keys := fs.String("keys", "x,y,z", "comma-separated keys")
 	mops := fs.Int("mops", 4, "max operations per transaction")
 	seed := fs.Int64("seed", 1, "workload seed")
+	shapesPath := fs.String("shapes", "", "JSON file of transaction shapes to run instead of random transactions")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
@@ -33,6 +35,16 @@ func runPG(args []string, stdout, stderr io.Writer) int {
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 2
+	}
+	cfg := generator.Config{Keys: strings.Split(*keys, ","), Txns: *txns, MaxMops: *mops}
+	ops := generator.Invocations(cfg, *seed)
+	if *shapesPath != "" {
+		shapes, err := loadShapes(*shapesPath)
+		if err != nil {
+			fmt.Fprintln(stderr, "shapes:", err)
+			return 2
+		}
+		ops = generator.FromShapes(shapes, *txns, *seed)
 	}
 	if *dsn == "" {
 		fmt.Fprintln(stderr, "no database: pass -dsn or set ELLE_PG")
@@ -49,8 +61,7 @@ func runPG(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, "setup:", err)
 		return 2
 	}
-	cfg := generator.Config{Keys: strings.Split(*keys, ","), Txns: *txns, MaxMops: *mops}
-	h := pgrun.Run(ctx, db, iso, generator.Invocations(cfg, *seed), *workers)
+	h := pgrun.Run(ctx, db, iso, ops, *workers)
 	v, err := checker.Check(h)
 	if err != nil {
 		fmt.Fprintln(stderr, "invalid history:", err)
@@ -72,4 +83,19 @@ func committed(h history.History) int {
 		}
 	}
 	return n
+}
+
+func loadShapes(path string) ([]history.Op, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var shapes []history.Op
+	if err := json.Unmarshal(b, &shapes); err != nil {
+		return nil, err
+	}
+	if len(shapes) == 0 {
+		return nil, fmt.Errorf("%s has no shapes", path)
+	}
+	return shapes, nil
 }
