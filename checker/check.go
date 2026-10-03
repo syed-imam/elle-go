@@ -7,12 +7,15 @@ import (
 	"elle-go/listappend"
 )
 
-func Check(h history.History) anomaly.Verdict {
+func Check(h history.History) (anomaly.Verdict, error) {
+	if err := listappend.Validate(h); err != nil {
+		return anomaly.Verdict{}, err
+	}
 	g := graph.New()
 	for _, e := range listappend.Dependencies(h) {
 		g.AddEdge(e.From, e.To, toRel(e.Type))
 	}
-	return anomaly.Check(g)
+	return anomaly.Check(g), nil
 }
 
 func toRel(t listappend.EdgeType) graph.Rel {

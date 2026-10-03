@@ -19,9 +19,22 @@ func TestCheck(t *testing.T) {
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			if got := Check(c.h).Anomaly; got != c.want {
-				t.Errorf("got %v, want %v", got, c.want)
+			v, err := Check(c.h)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if v.Anomaly != c.want {
+				t.Errorf("got %v, want %v", v.Anomaly, c.want)
 			}
 		})
+	}
+}
+
+func TestCheckRejectsUnwrittenRead(t *testing.T) {
+	h := history.History{
+		{Process: 1, Type: history.Ok, Mops: []history.Mop{{Type: history.Read, Key: "x", Read: []int{99}}}},
+	}
+	if _, err := Check(h); err == nil {
+		t.Fatal("expected error for read of unwritten value")
 	}
 }
