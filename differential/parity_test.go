@@ -29,7 +29,10 @@ func TestParityFixtures(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%s: RunElle: %v", c.name, err)
 		}
-		ours := Verdict(c.h)
+		ours, err := Verdict(c.h)
+		if err != nil {
+			t.Fatalf("%s: Verdict: %v", c.name, err)
+		}
 		ourViolation := ours.Anomaly != anomaly.None
 		if ourViolation != elle.Violation() {
 			t.Errorf("%s: violation disagreement: elle.valid?=%q (viol=%v %v) vs ours=%v",
@@ -54,7 +57,10 @@ func TestParityGenerated(t *testing.T) {
 		if err != nil {
 			t.Fatalf("seed %d: RunElle: %v", seed, err)
 		}
-		ours := Verdict(h)
+		ours, err := Verdict(h)
+		if err != nil {
+			t.Fatalf("seed %d: Verdict: %v", seed, err)
+		}
 		ourViolation := ours.Anomaly != anomaly.None
 		if ourViolation != elle.Violation() {
 			t.Errorf("seed %d: disagree: elle valid?=%q %v vs ours=%v",
@@ -100,7 +106,10 @@ func checkParityViolation(t *testing.T, gen func(generator.Config, int64) histor
 		if err != nil {
 			t.Fatalf("seed %d: RunElle: %v", seed, err)
 		}
-		ours := Verdict(h)
+		ours, err := Verdict(h)
+		if err != nil {
+			t.Fatalf("seed %d: Verdict: %v", seed, err)
+		}
 		if ours.Anomaly == anomaly.None || !elle.Violation() {
 			t.Errorf("seed %d: expected both to flag a violation: elle valid?=%q %v vs ours=%v",
 				seed, elle.ValidField, elle.AnomalyTypes, ours)
