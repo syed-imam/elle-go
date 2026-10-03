@@ -30,7 +30,7 @@ Stop and tell the user the check would be unsound, rather than guessing, when th
 
 ## 3. Confirm with the user
 
-Show the shapes as a short table (transaction type → ordered ops) plus the isolation level you'll test. Determine the level from the code or config; Postgres defaults to `read-committed`. Ask the user to confirm or correct before running. This review is the safety gate against a wrong extraction.
+Show only: the shapes table (transaction → ordered ops), the isolation level with a few words on where it came from (Postgres defaults to `read-committed`), and at most two short bullets on assumptions that could make the check wrong. Then ask: "Run it?" The user can correct the shapes or the level first. This review is the safety gate against a wrong extraction.
 
 ## 4. Run
 
@@ -53,13 +53,37 @@ The script starts a disposable container (Postgres plus elle-go, pulled automati
 
 Exit codes: `0` = no anomaly found, `1` = anomaly found, `2` = setup or input error (report it; Docker not running and the image failing to pull are the common causes).
 
-## 5. Explain
+## 5. Report
 
-- **Anomaly (exit 1).** Name it in plain words (G2 = write skew, G-single = read skew, G1c = circular information flow, G0 = write cycle). Then explain the cycle in terms of the user's code: which two code paths interleave, and what goes wrong for their data. Propose a concrete fix:
-  - raise the isolation level to the one the verdict says it requires, or
-  - lock the rows that were read (`SELECT ... FOR UPDATE`), or
-  - add a constraint that turns the invariant into a write conflict.
+Keep the report short and in plain words. Say what breaks for the user's data, not the theory. Don't use anomaly codes (G2, G-single) unless the user asks; use the plain name. Use exactly this format, with no extra sections:
 
-  Offer to re-run at the fixed isolation level to confirm it comes back clean.
-- **Clean (exit 0).** Say exactly "no anomaly found in N transactions at <level>". This is evidence, not proof of safety. Never call the code "safe".
-- Mention how many transactions committed. A high abort rate under `repeatable-read` or `serializable` means the app needs retry logic for serialization failures.
+**Problem found (exit 1):**
+
+```
+❌ <plain name> at <level>
+<One sentence: which calls run at the same time, and what goes wrong for the data.>
+Fix: <one concrete change, e.g. "use serializable for this transaction" or "add FOR UPDATE to the doctors SELECT">
+```
+
+Then ask one question: "Re-run with the fix to confirm?"
+
+Plain names: lost or overwritten update / write skew (G2), inconsistent read (G-single), transactions seeing each other's writes (G1c), conflicting writes (G0).
+
+Example:
+
+```
+❌ Write skew at read-committed
+Alice and Bob can go off call at the same moment; both see two doctors on call, so the shift ends up with nobody.
+Fix: run GoOffCall at serializable (and retry on serialization errors).
+```
+
+**No problem found (exit 0):**
+
+```
+✅ No problem found in <N> runs at <level>
+This is not a guarantee, only that the race didn't show up in these runs.
+```
+
+Add one line only if more than a third of transactions aborted: "Note: <X>% of runs were rejected by Postgres; your code needs to retry on serialization errors."
+
+**Error (exit 2):** one line saying what failed and how to fix it (e.g. "Docker isn't running; start it and try again.").
