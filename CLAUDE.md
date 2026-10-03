@@ -30,7 +30,8 @@ key — making ww/wr/rw dependency inference tractable.
 This is a **learning project**. The owner is an experienced engineer (Java,
 Elixir, TS/JS, Ruby, PHP) getting hands-on with Go. When making code changes:
 
-- Keep edits **small** (~15 lines at a time) so each step is learnable.
+- Keep each step **one logical, committable unit** (a small feature + its
+  test) so each step is learnable.
 - **No comments in code.** The owner reads code directly; do not add code
   comments (including Go doc comments). Explain concepts in chat instead.
 - **Never run `git commit` or `git push`.** The owner makes ALL commits
@@ -53,26 +54,32 @@ process/realtime variants), `txn`, `rw_register`.
 Standard Go tooling applies:
 
 - Build: `go build ./...`
-- Run: `go run .`
+- Check a JSON history: `go run . history.json` (or pipe to stdin); exit 0 clean / 1 anomaly / 2 bad input
+- Run a workload on Postgres: `go run . pg -isolation read-committed|repeatable-read|serializable` (DSN via `-dsn` or `$ELLE_PG`; disposable DB only — it creates and truncates `elle_lists`)
 - Test (all): `go test ./...`
 - Test (single package): `go test ./path/to/pkg`
 - Test (single test): `go test ./path/to/pkg -run '^TestName$' -v`
+- Elle parity (slow, JVM per history): `ELLE_PARITY=1 go test ./differential -timeout 45m`
+- Live Postgres tests: `ELLE_PG=<dsn> go test ./pgrun` (skipped without it)
 - Vet: `go vet ./...`
 - Format: `gofmt -w .` (or `go fmt ./...`)
 
 ## Architecture
 
-The checker is a pipeline; data flows through four packages:
+The checker is a pipeline; data flows through four packages, wrapped by a
+façade:
 
-    history → listappend → graph → anomaly
+    history → listappend → graph → anomaly      (checker.Check glues them)
 
 - `history` — the data model. A `History` is an ordered slice of `Op`
   (transactions); each `Op` has `Mops` (micro-ops: `Append` or `Read` on a
   named key). An op's index is its transaction identity throughout the pipeline.
+  Types encode to JSON as names (`"ok"`, `"append"`, `"r"`) with lowercase keys.
 - `listappend` — the workload logic. `VersionOrder` recovers each key's write
   order from list reads; `Dependencies` infers the ww/wr/rw `Edge`s between
   transactions from that order. This is where list-append's "a read recovers the
-  full version order of a key" property is exploited.
+  full version order of a key" property is exploited. `Validate` rejects reads
+  of values no committed op appended.
 - `graph` — a generic directed multigraph with **typed edges** (`Rel`, a bitset
   of ww/wr/rw). Nodes are transaction indices; the rel lives on the edge, never
   the node. Provides the cycle/anomaly primitives: `FindCycle` (returns a
@@ -93,6 +100,15 @@ Key design decisions (rationale in `DESIGN.md`):
 - **Formal isolation levels only.** `Level` is the Adya/ANSI hierarchy;
   translating to a vendor's (often mislabeled) level names is kept separate.
 
-Not yet wired (see `ROADMAP.md`): there is no production `Check(history) →
-Result` façade — the history→graph build currently lives only in test helpers.
-That glue, real error handling, and the exported API are M3.
+Around the pipeline:
+
+- `checker` — the public façade: `Check(history) (anomaly.Verdict, error)`
+  validates, builds the graph, and classifies.
+- `generator` — synthetic workloads: `Serial` (valid histories), one injector
+  per cycle class (`WriteCycle` G0, `CircularInformationFlow` G1c, `ReadSkew`
+  G-single, `WriteSkew` G2), and `Invocations` (unfilled txns for a real DB).
+- `differential` — parity harness against upstream Elle (`RunElle`,
+  `TypeAgrees`); opt-in via `ELLE_PARITY=1`.
+- `pgrun` — runs list-append txns on Postgres (`Exec` one txn, `Run` a worker
+  pool) at a chosen isolation level; keys are rows in `elle_lists` (`int[]`).
+- `main` — CLI: check a JSON history, or `pg` to run a workload and verdict it.
