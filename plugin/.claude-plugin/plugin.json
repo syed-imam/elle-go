@@ -1,0 +1,16 @@
+{
+  "name": "elle-go",
+  "version": "0.1.0",
+  "description": "Find serializability anomalies in your transactional code by running its shapes against a throwaway Postgres and checking the history with elle-go.",
+  "author": {
+    "name": "Syed Imam"
+  },
+  "repository": "https://github.com/syed-imam/elle-go",
+  "keywords": [
+    "database",
+    "transactions",
+    "serializability",
+    "postgres",
+    "isolation"
+  ]
+}
