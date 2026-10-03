@@ -49,9 +49,9 @@ Then run:
 ${CLAUDE_PLUGIN_ROOT}/skills/check-tx/scripts/check.sh <shapes.json> <read-committed|repeatable-read|serializable> [txns]
 ```
 
-The script starts a disposable Postgres container, runs the workload, and removes the container. It never touches the user's databases.
+The script starts a disposable container (Postgres plus elle-go, pulled automatically on first use), runs the workload inside it, and removes the container. It never touches the user's databases. The user needs only Docker.
 
-Exit codes: `0` = no anomaly found, `1` = anomaly found, `2` = setup or input error (report it; elle-go not on PATH and Docker not running are the common causes).
+Exit codes: `0` = no anomaly found, `1` = anomaly found, `2` = setup or input error (report it; Docker not running and the image failing to pull are the common causes).
 
 ## 5. Explain
 

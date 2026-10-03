@@ -1,0 +1,7 @@
+.git
+.idea
+.claude-plugin
+plugin
+docs
+examples
+*.test
