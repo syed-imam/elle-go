@@ -7,6 +7,9 @@ import (
 	"reflect"
 	"testing"
 
+	"elle-go/anomaly"
+	"elle-go/checker"
+	"elle-go/generator"
 	"elle-go/history"
 )
 
@@ -44,5 +47,21 @@ func TestExecAppendThenRead(t *testing.T) {
 	}
 	if !reflect.DeepEqual(got.Mops[0].Read, []int{}) || !reflect.DeepEqual(got.Mops[3].Read, []int{1, 2}) {
 		t.Fatalf("reads = %v, %v", got.Mops[0].Read, got.Mops[3].Read)
+	}
+}
+
+func TestRunSerializableIsClean(t *testing.T) {
+	db := openTestDB(t)
+	cfg := generator.Config{Keys: []string{"x", "y", "z"}, Txns: 300, MaxMops: 4}
+	h := Run(context.Background(), db, sql.LevelSerializable, generator.Invocations(cfg, 1), 8)
+	if len(h) != cfg.Txns {
+		t.Fatalf("got %d completed ops, want %d", len(h), cfg.Txns)
+	}
+	v, err := checker.Check(h)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v.Anomaly != anomaly.None {
+		t.Fatalf("SERIALIZABLE produced an anomaly: %v", v)
 	}
 }
