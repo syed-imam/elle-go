@@ -71,6 +71,14 @@ func TestParityGenerated(t *testing.T) {
 }
 
 func TestParityWriteSkew(t *testing.T) {
+	checkParityViolation(t, generator.WriteSkew)
+}
+
+func TestParityReadSkew(t *testing.T) {
+	checkParityViolation(t, generator.ReadSkew)
+}
+
+func checkParityViolation(t *testing.T, gen func(generator.Config, int64) history.History) {
 	if os.Getenv("ELLE_PARITY") == "" {
 		t.Skip("set ELLE_PARITY=1 to run the Elle differential test (slow: JVM per history)")
 	}
@@ -79,7 +87,7 @@ func TestParityWriteSkew(t *testing.T) {
 	}
 	cfg := generator.Config{Keys: []string{"x", "y", "z"}}
 	for seed := int64(0); seed < 5; seed++ {
-		h := generator.WriteSkew(cfg, seed)
+		h := gen(cfg, seed)
 		elle, err := RunElle(h)
 		if err != nil {
 			t.Fatalf("seed %d: RunElle: %v", seed, err)

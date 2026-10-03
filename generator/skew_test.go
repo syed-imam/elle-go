@@ -7,6 +7,16 @@ import (
 	"elle-go/differential"
 )
 
+func TestReadSkewIsGSingle(t *testing.T) {
+	cfg := Config{Keys: []string{"x", "y", "z"}}
+	for seed := int64(0); seed < 200; seed++ {
+		h := ReadSkew(cfg, seed)
+		if v := differential.Verdict(h); v.Anomaly != anomaly.GSingle {
+			t.Fatalf("seed %d: expected G-single, got %v (cycle %v)", seed, v.Anomaly, v.Cycle)
+		}
+	}
+}
+
 func TestWriteSkewIsG2(t *testing.T) {
 	cfg := Config{Keys: []string{"x", "y", "z"}}
 	for seed := int64(0); seed < 200; seed++ {
