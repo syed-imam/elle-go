@@ -6,6 +6,7 @@ func Dependencies(h history.History) []Edge {
 	writers := appendedBy(h)
 	orders := VersionOrder(h)
 	edges := []Edge{}
+	observed := observedValues(orders)
 
 	for key, order := range orders {
 		for i := 0; i+1 < len(order); i++ {
@@ -33,7 +34,7 @@ func Dependencies(h history.History) []Edge {
 				}
 			}
 			for v, w := range writers[mop.Key] {
-				if !seen[v] && w != i {
+				if !seen[v] && w != i && (h[w].Type == history.Ok || observed[mop.Key][v]) {
 					edges = append(edges, Edge{From: i, To: w, Type: RW})
 				}
 			}
@@ -46,7 +47,7 @@ func Dependencies(h history.History) []Edge {
 func appendedBy(h history.History) map[string]map[int]int {
 	writers := map[string]map[int]int{}
 	for i, op := range h {
-		if op.Type != history.Ok {
+		if op.Type != history.Ok && op.Type != history.Info {
 			continue
 		}
 		for _, mop := range op.Mops {
@@ -60,4 +61,15 @@ func appendedBy(h history.History) map[string]map[int]int {
 		}
 	}
 	return writers
+}
+
+func observedValues(orders map[string][]int) map[string]map[int]bool {
+	observed := map[string]map[int]bool{}
+	for key, order := range orders {
+		observed[key] = map[int]bool{}
+		for _, v := range order {
+			observed[key][v] = true
+		}
+	}
+	return observed
 }

@@ -43,7 +43,7 @@ func Exec(ctx context.Context, db *sql.DB, iso sql.IsolationLevel, op history.Op
 		}
 	}
 	if tx.Commit() != nil {
-		return done
+		return history.Op{Process: op.Process, Type: history.Info, Mops: op.Mops}
 	}
 	return history.Op{Process: op.Process, Type: history.Ok, Mops: mops}
 }

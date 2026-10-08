@@ -55,3 +55,30 @@ func TestSerializableNoRW(t *testing.T) {
 		t.Errorf("expected ww edge 0->1, got %v", edges)
 	}
 }
+
+func infoAppend(app int) history.Op {
+	return history.Op{Process: 9, Type: history.Info, Mops: []history.Mop{{Type: history.Append, Key: "x", App: app}}}
+}
+
+func TestObservedInfoAppendIsWriter(t *testing.T) {
+	h := history.History{
+		infoAppend(1),
+		{Process: 2, Type: history.Ok, Mops: []history.Mop{{Type: history.Read, Key: "x", Read: []int{1}}}},
+	}
+	if err := Validate(h); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if edges := Dependencies(h); !has(edges, 0, 1, WR) {
+		t.Errorf("expected wr edge 0->1, got %v", edges)
+	}
+}
+
+func TestUnobservedInfoAppendHasNoEdges(t *testing.T) {
+	h := history.History{
+		infoAppend(1),
+		{Process: 2, Type: history.Ok, Mops: []history.Mop{{Type: history.Read, Key: "x", Read: []int{}}}},
+	}
+	if edges := Dependencies(h); len(edges) != 0 {
+		t.Errorf("expected no edges, got %v", edges)
+	}
+}
