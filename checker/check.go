@@ -11,6 +11,9 @@ func Check(h history.History) (anomaly.Verdict, error) {
 	if err := listappend.Validate(h); err != nil {
 		return anomaly.Verdict{}, err
 	}
+	if c, ok := listappend.IncompatibleOrder(h); ok {
+		return anomaly.IncompatibleOrderVerdict(c.Key, c.Shorter, c.Longer), nil
+	}
 	g := graph.New()
 	for _, e := range listappend.Dependencies(h) {
 		g.AddEdge(e.From, e.To, toRel(e.Type))

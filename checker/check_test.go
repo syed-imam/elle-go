@@ -38,3 +38,19 @@ func TestCheckRejectsUnwrittenRead(t *testing.T) {
 		t.Fatal("expected error for read of unwritten value")
 	}
 }
+
+func TestCheckIncompatibleOrder(t *testing.T) {
+	h := history.History{
+		{Process: 1, Type: history.Ok, Mops: []history.Mop{{Type: history.Append, Key: "x", App: 1}}},
+		{Process: 2, Type: history.Ok, Mops: []history.Mop{{Type: history.Append, Key: "x", App: 2}}},
+		{Process: 3, Type: history.Ok, Mops: []history.Mop{{Type: history.Read, Key: "x", Read: []int{1, 2}}}},
+		{Process: 4, Type: history.Ok, Mops: []history.Mop{{Type: history.Read, Key: "x", Read: []int{2, 1}}}},
+	}
+	v, err := Check(h)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v.Anomaly != anomaly.IncompatibleOrder || v.Key != "x" {
+		t.Fatalf("got %v on key %q", v.Anomaly, v.Key)
+	}
+}

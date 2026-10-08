@@ -17,6 +17,7 @@ const (
 	G1c
 	GSingle
 	G2
+	IncompatibleOrder
 )
 
 func (a Anomaly) String() string {
@@ -29,6 +30,8 @@ func (a Anomaly) String() string {
 		return "G-single"
 	case G2:
 		return "G2"
+	case IncompatibleOrder:
+		return "incompatible-order"
 	default:
 		return "none"
 	}
@@ -38,6 +41,12 @@ type Verdict struct {
 	Anomaly Anomaly
 	Level   Level
 	Cycle   []int
+	Key     string
+	Reads   [][]int
+}
+
+func IncompatibleOrderVerdict(key string, a, b []int) Verdict {
+	return Verdict{Anomaly: IncompatibleOrder, Level: Requires(IncompatibleOrder), Key: key, Reads: [][]int{a, b}}
 }
 
 func Classify(g *graph.Graph) Anomaly {
@@ -76,6 +85,10 @@ func closingCycle(g *graph.Graph, via graph.Rel) []int {
 func (v Verdict) String() string {
 	if v.Anomaly == None {
 		return "no anomaly found"
+	}
+	if v.Anomaly == IncompatibleOrder {
+		return fmt.Sprintf("%v: key %q read as %v and %v, which no single order of appends explains (requires %v or stronger)",
+			v.Anomaly, v.Key, v.Reads[0], v.Reads[1], v.Level)
 	}
 	loop := append(slices.Clone(v.Cycle), v.Cycle[0])
 	nodes := make([]string, len(loop))
