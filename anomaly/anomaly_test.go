@@ -149,6 +149,12 @@ func TestVerdictString(t *testing.T) {
 		t.Errorf("String() = %q, want %q", got, want)
 	}
 
+	v = LostUpdateVerdict("x", []int{}, []int{1, 2})
+	want = `lost-update: transactions 1 and 2 both read key "x" as [], then appended to it (requires snapshot isolation or stronger)`
+	if got := v.String(); got != want {
+		t.Errorf("String() = %q, want %q", got, want)
+	}
+
 	v = InternalVerdict(0, "x", []int{2}, true, []int{1})
 	want = `internal: transaction 0 read key "x" as [1], but its own earlier reads and appends imply …[2] (requires snapshot isolation or stronger)`
 	if got := v.String(); got != want {

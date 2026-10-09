@@ -16,6 +16,8 @@ func elleName(a anomaly.Anomaly) string {
 		return "incompatible-order"
 	case anomaly.Internal:
 		return "internal"
+	case anomaly.LostUpdate:
+		return "lost-update"
 	default:
 		return ""
 	}

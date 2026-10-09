@@ -93,3 +93,17 @@ func LostOwnAppend(cfg Config, seed int64) history.History {
 		}},
 	}
 }
+
+func LostUpdate(cfg Config, seed int64) history.History {
+	kx, _ := keyPair(cfg, seed)
+	return history.History{
+		{Process: 1, Type: history.Ok, Mops: []history.Mop{
+			{Type: history.Read, Key: kx, Read: []int{}},
+			{Type: history.Append, Key: kx, App: 1},
+		}},
+		{Process: 2, Type: history.Ok, Mops: []history.Mop{
+			{Type: history.Read, Key: kx, Read: []int{}},
+			{Type: history.Append, Key: kx, App: 2},
+		}},
+	}
+}

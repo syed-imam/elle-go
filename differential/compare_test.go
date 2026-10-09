@@ -32,3 +32,9 @@ func TestTypeAgreesInternal(t *testing.T) {
 		t.Error("Internal should agree with [G-single-item internal]")
 	}
 }
+
+func TestTypeAgreesLostUpdate(t *testing.T) {
+	if !TypeAgrees(anomaly.LostUpdate, []string{"lost-update"}) {
+		t.Error("LostUpdate should agree with [lost-update]")
+	}
+}

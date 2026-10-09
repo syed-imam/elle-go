@@ -100,6 +100,10 @@ func TestParityLostOwnAppend(t *testing.T) {
 	checkParityViolation(t, generator.LostOwnAppend)
 }
 
+func TestParityLostUpdate(t *testing.T) {
+	checkParityViolation(t, generator.LostUpdate)
+}
+
 func checkParityViolation(t *testing.T, gen func(generator.Config, int64) history.History) {
 	if os.Getenv("ELLE_PARITY") == "" {
 		t.Skip("set ELLE_PARITY=1 to run the Elle differential test (slow: JVM per history)")

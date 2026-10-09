@@ -66,3 +66,13 @@ func TestLostOwnAppendIsInternal(t *testing.T) {
 		}
 	}
 }
+
+func TestLostUpdateIsLostUpdate(t *testing.T) {
+	cfg := Config{Keys: []string{"x", "y", "z"}}
+	for seed := int64(0); seed < 200; seed++ {
+		h := LostUpdate(cfg, seed)
+		if v, err := differential.Verdict(h); err != nil || v.Anomaly != anomaly.LostUpdate {
+			t.Fatalf("seed %d: expected lost-update, got %v (err %v)", seed, v.Anomaly, err)
+		}
+	}
+}
