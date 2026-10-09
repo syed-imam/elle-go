@@ -4,7 +4,7 @@ import (
 	"slices"
 	"sort"
 
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/history"
 )
 
 type OrderConflict struct {

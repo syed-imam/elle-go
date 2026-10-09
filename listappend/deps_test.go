@@ -3,8 +3,8 @@ package listappend
 import (
 	"testing"
 
-	"elle-go/fixtures"
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/fixtures"
+	"github.com/syed-imam/elle-go/history"
 )
 
 func has(edges []Edge, from, to int, t EdgeType) bool {

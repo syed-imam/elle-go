@@ -3,9 +3,9 @@ package anomaly
 import (
 	"testing"
 
-	"elle-go/fixtures"
-	"elle-go/graph"
-	"elle-go/listappend"
+	"github.com/syed-imam/elle-go/fixtures"
+	"github.com/syed-imam/elle-go/graph"
+	"github.com/syed-imam/elle-go/listappend"
 )
 
 func TestClassifyShapes(t *testing.T) {
@@ -145,6 +145,12 @@ func TestVerdictString(t *testing.T) {
 
 	v = InternalVerdict(3, "x", []int{1}, false, []int{1, 2})
 	want = `internal: transaction 3 read key "x" as [1 2], but its own earlier reads and appends imply [1] (requires snapshot isolation or stronger)`
+	if got := v.String(); got != want {
+		t.Errorf("String() = %q, want %q", got, want)
+	}
+
+	v = LostUpdateVerdict("x", []int{}, []int{1, 2})
+	want = `lost-update: transactions 1 and 2 both read key "x" as [], then appended to it (requires snapshot isolation or stronger)`
 	if got := v.String(); got != want {
 		t.Errorf("String() = %q, want %q", got, want)
 	}

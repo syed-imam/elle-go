@@ -1,6 +1,6 @@
 package listappend
 
-import "elle-go/history"
+import "github.com/syed-imam/elle-go/history"
 
 func Dependencies(h history.History) []Edge {
 	writers := appendedBy(h)

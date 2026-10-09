@@ -3,8 +3,8 @@ package generator
 import (
 	"testing"
 
-	"elle-go/anomaly"
-	"elle-go/differential"
+	"github.com/syed-imam/elle-go/anomaly"
+	"github.com/syed-imam/elle-go/differential"
 )
 
 func TestReadSkewIsGSingle(t *testing.T) {
@@ -63,6 +63,16 @@ func TestLostOwnAppendIsInternal(t *testing.T) {
 		h := LostOwnAppend(cfg, seed)
 		if v, err := differential.Verdict(h); err != nil || v.Anomaly != anomaly.Internal {
 			t.Fatalf("seed %d: expected internal, got %v (err %v)", seed, v.Anomaly, err)
+		}
+	}
+}
+
+func TestLostUpdateIsLostUpdate(t *testing.T) {
+	cfg := Config{Keys: []string{"x", "y", "z"}}
+	for seed := int64(0); seed < 200; seed++ {
+		h := LostUpdate(cfg, seed)
+		if v, err := differential.Verdict(h); err != nil || v.Anomaly != anomaly.LostUpdate {
+			t.Fatalf("seed %d: expected lost-update, got %v (err %v)", seed, v.Anomaly, err)
 		}
 	}
 }

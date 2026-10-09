@@ -14,6 +14,7 @@ func TestRequires(t *testing.T) {
 		{G2, Serializable},
 		{IncompatibleOrder, ReadCommitted},
 		{Internal, SnapshotIsolation},
+		{LostUpdate, SnapshotIsolation},
 	}
 	for _, c := range cases {
 		if got := Requires(c.a); got != c.want {

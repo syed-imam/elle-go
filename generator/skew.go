@@ -3,7 +3,7 @@ package generator
 import (
 	"math/rand"
 
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/history"
 )
 
 func keyPair(cfg Config, seed int64) (string, string) {
@@ -90,6 +90,20 @@ func LostOwnAppend(cfg Config, seed int64) history.History {
 		{Process: 2, Type: history.Ok, Mops: []history.Mop{
 			{Type: history.Append, Key: kx, App: 2},
 			{Type: history.Read, Key: kx, Read: []int{1}},
+		}},
+	}
+}
+
+func LostUpdate(cfg Config, seed int64) history.History {
+	kx, _ := keyPair(cfg, seed)
+	return history.History{
+		{Process: 1, Type: history.Ok, Mops: []history.Mop{
+			{Type: history.Read, Key: kx, Read: []int{}},
+			{Type: history.Append, Key: kx, App: 1},
+		}},
+		{Process: 2, Type: history.Ok, Mops: []history.Mop{
+			{Type: history.Read, Key: kx, Read: []int{}},
+			{Type: history.Append, Key: kx, App: 2},
 		}},
 	}
 }

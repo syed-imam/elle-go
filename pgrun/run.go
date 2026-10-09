@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"sync"
 
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/history"
 )
 
 func Run(ctx context.Context, db *sql.DB, iso sql.IsolationLevel, ops []history.Op, workers int) history.History {

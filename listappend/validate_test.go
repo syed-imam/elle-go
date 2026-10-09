@@ -3,7 +3,7 @@ package listappend
 import (
 	"testing"
 
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/history"
 )
 
 func TestValidateUnknownRead(t *testing.T) {

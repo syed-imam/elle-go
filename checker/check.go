@@ -1,10 +1,10 @@
 package checker
 
 import (
-	"elle-go/anomaly"
-	"elle-go/graph"
-	"elle-go/history"
-	"elle-go/listappend"
+	"github.com/syed-imam/elle-go/anomaly"
+	"github.com/syed-imam/elle-go/graph"
+	"github.com/syed-imam/elle-go/history"
+	"github.com/syed-imam/elle-go/listappend"
 )
 
 func Check(h history.History) (anomaly.Verdict, error) {
@@ -18,13 +18,17 @@ func Check(h history.History) (anomaly.Verdict, error) {
 	for _, e := range listappend.Dependencies(h) {
 		g.AddEdge(e.From, e.To, toRel(e.Type))
 	}
-	if v := anomaly.Check(g); v.Anomaly != anomaly.None {
+	v := anomaly.Check(g)
+	if v.Anomaly != anomaly.None && v.Anomaly != anomaly.G2 {
 		return v, nil
 	}
 	if c, ok := listappend.Internal(h); ok {
 		return anomaly.InternalVerdict(c.Op, c.Key, c.Expected, c.Prefixed, c.Read), nil
 	}
-	return anomaly.Verdict{}, nil
+	if c, ok := listappend.LostUpdate(h); ok {
+		return anomaly.LostUpdateVerdict(c.Key, c.Value, c.Ops), nil
+	}
+	return v, nil
 }
 
 func toRel(t listappend.EdgeType) graph.Rel {

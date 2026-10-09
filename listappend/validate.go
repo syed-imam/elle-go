@@ -3,7 +3,7 @@ package listappend
 import (
 	"fmt"
 
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/history"
 )
 
 func Validate(h history.History) error {

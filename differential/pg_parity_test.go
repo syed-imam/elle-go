@@ -6,9 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"elle-go/anomaly"
-	"elle-go/generator"
-	"elle-go/pgrun"
+	"github.com/syed-imam/elle-go/anomaly"
+	"github.com/syed-imam/elle-go/generator"
+	"github.com/syed-imam/elle-go/pgrun"
 )
 
 func TestParityPostgres(t *testing.T) {

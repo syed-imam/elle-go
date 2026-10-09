@@ -1,6 +1,6 @@
 package differential
 
-import "elle-go/anomaly"
+import "github.com/syed-imam/elle-go/anomaly"
 
 func elleName(a anomaly.Anomaly) string {
 	switch a {
@@ -16,6 +16,8 @@ func elleName(a anomaly.Anomaly) string {
 		return "incompatible-order"
 	case anomaly.Internal:
 		return "internal"
+	case anomaly.LostUpdate:
+		return "lost-update"
 	default:
 		return ""
 	}

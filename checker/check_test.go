@@ -1,11 +1,12 @@
 package checker
 
 import (
+	"slices"
 	"testing"
 
-	"elle-go/anomaly"
-	"elle-go/fixtures"
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/anomaly"
+	"github.com/syed-imam/elle-go/fixtures"
+	"github.com/syed-imam/elle-go/history"
 )
 
 func TestCheck(t *testing.T) {
@@ -72,7 +73,7 @@ func TestCheckInternal(t *testing.T) {
 	}
 }
 
-func TestCheckPrefersCycleOverInternal(t *testing.T) {
+func TestCheckPrefersInternalOverG2(t *testing.T) {
 	h := fixtures.WriteSkew()
 	h = append(h, history.Op{Process: 9, Type: history.Ok, Mops: []history.Mop{
 		{Type: history.Read, Key: "zz", Read: []int{}},
@@ -83,7 +84,44 @@ func TestCheckPrefersCycleOverInternal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if v.Anomaly != anomaly.G2 {
-		t.Fatalf("got %v, want G2", v.Anomaly)
+	if v.Anomaly != anomaly.Internal {
+		t.Fatalf("got %v, want internal", v.Anomaly)
+	}
+}
+
+func TestCheckLostUpdate(t *testing.T) {
+	h := history.History{
+		{Process: 1, Type: history.Ok, Mops: []history.Mop{
+			{Type: history.Read, Key: "x", Read: []int{}},
+			{Type: history.Append, Key: "x", App: 1},
+		}},
+		{Process: 2, Type: history.Ok, Mops: []history.Mop{
+			{Type: history.Read, Key: "x", Read: []int{}},
+			{Type: history.Append, Key: "x", App: 2},
+		}},
+	}
+	v, err := Check(h)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v.Anomaly != anomaly.LostUpdate || v.Key != "x" || !slices.Equal(v.Txns, []int{0, 1}) {
+		t.Fatalf("got %v on key %q txns %v", v.Anomaly, v.Key, v.Txns)
+	}
+}
+
+func TestCheckPrefersGSingleOverInternal(t *testing.T) {
+	h := history.History{
+		{Process: 1, Type: history.Ok, Mops: []history.Mop{{Type: history.Append, Key: "x", App: 1}}},
+		{Process: 2, Type: history.Ok, Mops: []history.Mop{
+			{Type: history.Read, Key: "x", Read: []int{}},
+			{Type: history.Read, Key: "x", Read: []int{1}},
+		}},
+	}
+	v, err := Check(h)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v.Anomaly != anomaly.GSingle {
+		t.Fatalf("got %v, want G-single", v.Anomaly)
 	}
 }

@@ -28,7 +28,7 @@ func Requires(a Anomaly) Level {
 		return ReadUncommitted
 	case G1c, IncompatibleOrder:
 		return ReadCommitted
-	case GSingle, Internal:
+	case GSingle, Internal, LostUpdate:
 		return SnapshotIsolation
 	case G2:
 		return Serializable

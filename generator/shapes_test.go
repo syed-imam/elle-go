@@ -3,7 +3,7 @@ package generator
 import (
 	"testing"
 
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/history"
 )
 
 func TestFromShapes(t *testing.T) {

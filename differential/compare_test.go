@@ -3,7 +3,7 @@ package differential
 import (
 	"testing"
 
-	"elle-go/anomaly"
+	"github.com/syed-imam/elle-go/anomaly"
 )
 
 func TestTypeAgrees(t *testing.T) {
@@ -30,5 +30,11 @@ func TestTypeAgreesIncompatibleOrder(t *testing.T) {
 func TestTypeAgreesInternal(t *testing.T) {
 	if !TypeAgrees(anomaly.Internal, []string{"G-single-item", "internal"}) {
 		t.Error("Internal should agree with [G-single-item internal]")
+	}
+}
+
+func TestTypeAgreesLostUpdate(t *testing.T) {
+	if !TypeAgrees(anomaly.LostUpdate, []string{"lost-update"}) {
+		t.Error("LostUpdate should agree with [lost-update]")
 	}
 }

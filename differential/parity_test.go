@@ -4,10 +4,10 @@ import (
 	"os"
 	"testing"
 
-	"elle-go/anomaly"
-	"elle-go/fixtures"
-	"elle-go/generator"
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/anomaly"
+	"github.com/syed-imam/elle-go/fixtures"
+	"github.com/syed-imam/elle-go/generator"
+	"github.com/syed-imam/elle-go/history"
 )
 
 func TestParityFixtures(t *testing.T) {
@@ -98,6 +98,10 @@ func TestParityDivergentReads(t *testing.T) {
 
 func TestParityLostOwnAppend(t *testing.T) {
 	checkParityViolation(t, generator.LostOwnAppend)
+}
+
+func TestParityLostUpdate(t *testing.T) {
+	checkParityViolation(t, generator.LostUpdate)
 }
 
 func checkParityViolation(t *testing.T, gen func(generator.Config, int64) history.History) {

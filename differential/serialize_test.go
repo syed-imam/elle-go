@@ -3,7 +3,7 @@ package differential
 import (
 	"testing"
 
-	"elle-go/fixtures"
+	"github.com/syed-imam/elle-go/fixtures"
 )
 
 func TestToEDNWriteSkew(t *testing.T) {
