@@ -82,3 +82,14 @@ func DivergentReads(cfg Config, seed int64) history.History {
 		{Process: 4, Type: history.Ok, Mops: []history.Mop{{Type: history.Read, Key: kx, Read: []int{2, 1}}}},
 	}
 }
+
+func LostOwnAppend(cfg Config, seed int64) history.History {
+	kx, _ := keyPair(cfg, seed)
+	return history.History{
+		{Process: 1, Type: history.Ok, Mops: []history.Mop{{Type: history.Append, Key: kx, App: 1}}},
+		{Process: 2, Type: history.Ok, Mops: []history.Mop{
+			{Type: history.Append, Key: kx, App: 2},
+			{Type: history.Read, Key: kx, Read: []int{1}},
+		}},
+	}
+}

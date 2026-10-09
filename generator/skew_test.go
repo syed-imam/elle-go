@@ -56,3 +56,13 @@ func TestDivergentReadsIsIncompatibleOrder(t *testing.T) {
 		}
 	}
 }
+
+func TestLostOwnAppendIsInternal(t *testing.T) {
+	cfg := Config{Keys: []string{"x", "y", "z"}}
+	for seed := int64(0); seed < 200; seed++ {
+		h := LostOwnAppend(cfg, seed)
+		if v, err := differential.Verdict(h); err != nil || v.Anomaly != anomaly.Internal {
+			t.Fatalf("seed %d: expected internal, got %v (err %v)", seed, v.Anomaly, err)
+		}
+	}
+}
