@@ -7,7 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	_ "github.com/jackc/pgx/v5/stdlib"
 
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/history"
 )
 
 const schema = `CREATE TABLE IF NOT EXISTS elle_lists (key text PRIMARY KEY, vals int[] NOT NULL)`

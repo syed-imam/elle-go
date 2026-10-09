@@ -1,10 +1,10 @@
 package checker
 
 import (
-	"elle-go/anomaly"
-	"elle-go/graph"
-	"elle-go/history"
-	"elle-go/listappend"
+	"github.com/syed-imam/elle-go/anomaly"
+	"github.com/syed-imam/elle-go/graph"
+	"github.com/syed-imam/elle-go/history"
+	"github.com/syed-imam/elle-go/listappend"
 )
 
 func Check(h history.History) (anomaly.Verdict, error) {

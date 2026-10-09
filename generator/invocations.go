@@ -3,7 +3,7 @@ package generator
 import (
 	"math/rand"
 
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/history"
 )
 
 func Invocations(cfg Config, seed int64) []history.Op {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/history"
 )
 
 func ToEDN(h history.History) string {

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"elle-go/graph"
+	"github.com/syed-imam/elle-go/graph"
 )
 
 type Anomaly int

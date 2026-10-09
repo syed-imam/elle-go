@@ -1,6 +1,6 @@
 package fixtures
 
-import "elle-go/history"
+import "github.com/syed-imam/elle-go/history"
 
 func WriteSkew() history.History {
 	return history.History{

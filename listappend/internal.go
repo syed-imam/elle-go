@@ -3,7 +3,7 @@ package listappend
 import (
 	"slices"
 
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/history"
 )
 
 type InternalCase struct {

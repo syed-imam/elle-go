@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"elle-go/fixtures"
+	"github.com/syed-imam/elle-go/fixtures"
 )
 
 func TestVersionOrder(t *testing.T) {

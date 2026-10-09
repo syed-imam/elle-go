@@ -4,10 +4,10 @@ import (
 	"os"
 	"testing"
 
-	"elle-go/anomaly"
-	"elle-go/fixtures"
-	"elle-go/generator"
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/anomaly"
+	"github.com/syed-imam/elle-go/fixtures"
+	"github.com/syed-imam/elle-go/generator"
+	"github.com/syed-imam/elle-go/history"
 )
 
 func TestParityFixtures(t *testing.T) {

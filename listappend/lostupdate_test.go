@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/history"
 )
 
 func TestLostUpdate(t *testing.T) {

@@ -1,6 +1,6 @@
 package differential
 
-import "elle-go/anomaly"
+import "github.com/syed-imam/elle-go/anomaly"
 
 func elleName(a anomaly.Anomaly) string {
 	switch a {

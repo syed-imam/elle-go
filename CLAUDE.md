@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-- Module: `elle-go` (see `go.mod`)
+- Module: `github.com/syed-imam/elle-go` (see `go.mod`)
 - Go version: 1.27
 
 > This is a new project. The sections below are intentionally sparse and should

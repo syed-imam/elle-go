@@ -3,8 +3,8 @@ package generator
 import (
 	"testing"
 
-	"elle-go/anomaly"
-	"elle-go/differential"
+	"github.com/syed-imam/elle-go/anomaly"
+	"github.com/syed-imam/elle-go/differential"
 )
 
 func TestSerialIsSerializable(t *testing.T) {

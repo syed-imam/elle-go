@@ -3,7 +3,7 @@ package differential
 import (
 	"testing"
 
-	"elle-go/anomaly"
+	"github.com/syed-imam/elle-go/anomaly"
 )
 
 func TestTypeAgrees(t *testing.T) {

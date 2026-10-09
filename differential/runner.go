@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/history"
 )
 
 type ElleResult struct {

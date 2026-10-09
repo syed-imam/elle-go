@@ -3,7 +3,7 @@ package fixtures
 import (
 	"testing"
 
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/history"
 )
 
 func TestFixtures(t *testing.T) {

@@ -1,9 +1,9 @@
 package differential
 
 import (
-	"elle-go/anomaly"
-	"elle-go/checker"
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/anomaly"
+	"github.com/syed-imam/elle-go/checker"
+	"github.com/syed-imam/elle-go/history"
 )
 
 func Verdict(h history.History) (anomaly.Verdict, error) {

@@ -4,9 +4,9 @@ import (
 	"slices"
 	"testing"
 
-	"elle-go/anomaly"
-	"elle-go/fixtures"
-	"elle-go/history"
+	"github.com/syed-imam/elle-go/anomaly"
+	"github.com/syed-imam/elle-go/fixtures"
+	"github.com/syed-imam/elle-go/history"
 )
 
 func TestCheck(t *testing.T) {

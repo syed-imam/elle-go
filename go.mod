@@ -1,4 +1,4 @@
-module elle-go
+module github.com/syed-imam/elle-go
 
 go 1.27
 

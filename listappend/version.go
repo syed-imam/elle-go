@@ -1,6 +1,6 @@
 package listappend
 
-import "elle-go/history"
+import "github.com/syed-imam/elle-go/history"
 
 func VersionOrder(h history.History) map[string][]int {
 	orders := map[string][]int{}

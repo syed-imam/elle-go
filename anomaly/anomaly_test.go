@@ -3,9 +3,9 @@ package anomaly
 import (
 	"testing"
 
-	"elle-go/fixtures"
-	"elle-go/graph"
-	"elle-go/listappend"
+	"github.com/syed-imam/elle-go/fixtures"
+	"github.com/syed-imam/elle-go/graph"
+	"github.com/syed-imam/elle-go/listappend"
 )
 
 func TestClassifyShapes(t *testing.T) {

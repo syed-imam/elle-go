@@ -3,8 +3,8 @@ package graph
 import (
 	"testing"
 
-	"elle-go/fixtures"
-	"elle-go/listappend"
+	"github.com/syed-imam/elle-go/fixtures"
+	"github.com/syed-imam/elle-go/listappend"
 )
 
 func rel(t listappend.EdgeType) Rel {
