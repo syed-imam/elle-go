@@ -54,3 +54,36 @@ func TestCheckIncompatibleOrder(t *testing.T) {
 		t.Fatalf("got %v on key %q", v.Anomaly, v.Key)
 	}
 }
+
+func TestCheckInternal(t *testing.T) {
+	h := history.History{
+		{Process: 1, Type: history.Ok, Mops: []history.Mop{{Type: history.Append, Key: "x", App: 1}}},
+		{Process: 2, Type: history.Ok, Mops: []history.Mop{
+			{Type: history.Append, Key: "x", App: 2},
+			{Type: history.Read, Key: "x", Read: []int{1}},
+		}},
+	}
+	v, err := Check(h)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v.Anomaly != anomaly.Internal || v.Op != 1 || v.Key != "x" {
+		t.Fatalf("got %v on op %d key %q", v.Anomaly, v.Op, v.Key)
+	}
+}
+
+func TestCheckPrefersCycleOverInternal(t *testing.T) {
+	h := fixtures.WriteSkew()
+	h = append(h, history.Op{Process: 9, Type: history.Ok, Mops: []history.Mop{
+		{Type: history.Read, Key: "zz", Read: []int{}},
+		{Type: history.Append, Key: "zz", App: 1},
+		{Type: history.Read, Key: "zz", Read: []int{}},
+	}})
+	v, err := Check(h)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v.Anomaly != anomaly.G2 {
+		t.Fatalf("got %v, want G2", v.Anomaly)
+	}
+}

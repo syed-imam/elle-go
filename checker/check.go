@@ -18,7 +18,13 @@ func Check(h history.History) (anomaly.Verdict, error) {
 	for _, e := range listappend.Dependencies(h) {
 		g.AddEdge(e.From, e.To, toRel(e.Type))
 	}
-	return anomaly.Check(g), nil
+	if v := anomaly.Check(g); v.Anomaly != anomaly.None {
+		return v, nil
+	}
+	if c, ok := listappend.Internal(h); ok {
+		return anomaly.InternalVerdict(c.Op, c.Key, c.Expected, c.Prefixed, c.Read), nil
+	}
+	return anomaly.Verdict{}, nil
 }
 
 func toRel(t listappend.EdgeType) graph.Rel {

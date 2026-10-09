@@ -26,3 +26,9 @@ func TestTypeAgreesIncompatibleOrder(t *testing.T) {
 		t.Error("IncompatibleOrder should agree with [G0 incompatible-order]")
 	}
 }
+
+func TestTypeAgreesInternal(t *testing.T) {
+	if !TypeAgrees(anomaly.Internal, []string{"G-single-item", "internal"}) {
+		t.Error("Internal should agree with [G-single-item internal]")
+	}
+}

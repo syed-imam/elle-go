@@ -18,6 +18,7 @@ const (
 	GSingle
 	G2
 	IncompatibleOrder
+	Internal
 )
 
 func (a Anomaly) String() string {
@@ -32,21 +33,29 @@ func (a Anomaly) String() string {
 		return "G2"
 	case IncompatibleOrder:
 		return "incompatible-order"
+	case Internal:
+		return "internal"
 	default:
 		return "none"
 	}
 }
 
 type Verdict struct {
-	Anomaly Anomaly
-	Level   Level
-	Cycle   []int
-	Key     string
-	Reads   [][]int
+	Anomaly  Anomaly
+	Level    Level
+	Cycle    []int
+	Key      string
+	Reads    [][]int
+	Op       int
+	Prefixed bool
 }
 
 func IncompatibleOrderVerdict(key string, a, b []int) Verdict {
 	return Verdict{Anomaly: IncompatibleOrder, Level: Requires(IncompatibleOrder), Key: key, Reads: [][]int{a, b}}
+}
+
+func InternalVerdict(op int, key string, expected []int, prefixed bool, read []int) Verdict {
+	return Verdict{Anomaly: Internal, Level: Requires(Internal), Op: op, Key: key, Reads: [][]int{expected, read}, Prefixed: prefixed}
 }
 
 func Classify(g *graph.Graph) Anomaly {
@@ -89,6 +98,14 @@ func (v Verdict) String() string {
 	if v.Anomaly == IncompatibleOrder {
 		return fmt.Sprintf("%v: key %q read as %v and %v, which no single order of appends explains (requires %v or stronger)",
 			v.Anomaly, v.Key, v.Reads[0], v.Reads[1], v.Level)
+	}
+	if v.Anomaly == Internal {
+		expected := fmt.Sprint(v.Reads[0])
+		if v.Prefixed {
+			expected = "…" + expected
+		}
+		return fmt.Sprintf("%v: transaction %d read key %q as %v, but its own earlier reads and appends imply %s (requires %v or stronger)",
+			v.Anomaly, v.Op, v.Key, v.Reads[1], expected, v.Level)
 	}
 	loop := append(slices.Clone(v.Cycle), v.Cycle[0])
 	nodes := make([]string, len(loop))

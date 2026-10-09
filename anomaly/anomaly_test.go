@@ -142,4 +142,16 @@ func TestVerdictString(t *testing.T) {
 	if got := v.String(); got != want {
 		t.Errorf("String() = %q, want %q", got, want)
 	}
+
+	v = InternalVerdict(3, "x", []int{1}, false, []int{1, 2})
+	want = `internal: transaction 3 read key "x" as [1 2], but its own earlier reads and appends imply [1] (requires snapshot isolation or stronger)`
+	if got := v.String(); got != want {
+		t.Errorf("String() = %q, want %q", got, want)
+	}
+
+	v = InternalVerdict(0, "x", []int{2}, true, []int{1})
+	want = `internal: transaction 0 read key "x" as [1], but its own earlier reads and appends imply …[2] (requires snapshot isolation or stronger)`
+	if got := v.String(); got != want {
+		t.Errorf("String() = %q, want %q", got, want)
+	}
 }
