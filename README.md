@@ -1,4 +1,4 @@
-# elle-go
+![elle-go](docs/logo.png)
 
 A serializability checker for transactional databases, written in Go and
 inspired by Jepsen's [Elle](https://github.com/jepsen-io/elle).
