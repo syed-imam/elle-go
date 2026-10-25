@@ -57,7 +57,7 @@ func runPG(args []string, stdout, stderr io.Writer) int {
 	}
 	defer db.Close()
 	ctx := context.Background()
-	if err := pgrun.Setup(ctx, db); err != nil {
+	if err := pgrun.Setup(ctx, db, history.History(ops).Keys()); err != nil {
 		fmt.Fprintln(stderr, "setup:", err)
 		return 2
 	}

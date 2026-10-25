@@ -131,6 +131,18 @@ repeatable-read: 92/300 committed
 G2: transactions 296 → 295 → 296 (requires serializable or stronger)
 ```
 
+A read marked `"lock": true` runs as `SELECT … FOR UPDATE`. Locking both doctor
+rows fixes the write skew, even at read committed:
+
+```sh
+elle-go pg -isolation read-committed -shapes examples/write-skew-locked.json
+```
+
+```
+read-committed: 300/300 committed
+no anomaly found
+```
+
 ### Claude Code plugin
 
 The `check-tx` skill takes the transaction code you just wrote, extracts its
@@ -142,6 +154,18 @@ in Docker. The only requirement is Docker.
 /plugin install elle-go@elle-go
 /elle-go:check-tx
 ```
+
+For example, run on a "last doctor goes off call" transaction it reports:
+
+```
+read-committed: 300/300 committed
+G-single: transactions 220 → 218 → 220 (requires snapshot isolation or stronger)
+```
+
+Claude then explains the write skew in terms of your code and proposes a fix
+(`SELECT … FOR UPDATE`), and the re-run comes back clean. See
+[examples](examples/README.md) for what it finds on a write skew, a lost
+update, a correctly locked transaction, and a query it refuses to check.
 
 ## Agreement with Elle
 
@@ -162,8 +186,8 @@ ELLE_PARITY=1 go test ./differential -timeout 45m   # needs lein and ../elle-ups
   supported.
 - **Item-level only.** Predicate reads (`WHERE`, `COUNT(*)`, ranges) and
   phantoms aren't modeled.
-- **No locking.** `pg` and `-shapes` don't take explicit locks, so code that
-  relies on `SELECT … FOR UPDATE` will be reported as anomalous.
+- **Row locks only.** `"lock": true` models `SELECT … FOR UPDATE`. Shared
+  locks (`FOR SHARE`), advisory locks, and table locks aren't modeled.
 - **One verdict per history:** the most severe anomaly found, not every one.
 - **No aborted or intermediate reads.** A read of a value that no committed or
   in-doubt transaction appended is rejected as invalid input, not reported as

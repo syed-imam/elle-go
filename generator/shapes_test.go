@@ -29,3 +29,11 @@ func TestFromShapes(t *testing.T) {
 		t.Fatal("FromShapes mutated its input")
 	}
 }
+
+func TestFromShapesKeepsLock(t *testing.T) {
+	shapes := []history.Op{{Mops: []history.Mop{{Type: history.Read, Key: "x", Lock: true}, {Type: history.Append, Key: "x"}}}}
+	op := FromShapes(shapes, 1, 1)[0]
+	if !op.Mops[0].Lock || op.Mops[1].Lock {
+		t.Fatalf("lock flags not preserved: %+v", op.Mops)
+	}
+}

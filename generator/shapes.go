@@ -14,7 +14,7 @@ func FromShapes(shapes []history.Op, txns int, seed int64) []history.Op {
 		shape := shapes[r.Intn(len(shapes))]
 		mops := make([]history.Mop, len(shape.Mops))
 		for j, m := range shape.Mops {
-			mops[j] = history.Mop{Type: m.Type, Key: m.Key}
+			mops[j] = history.Mop{Type: m.Type, Key: m.Key, Lock: m.Lock}
 			if m.Type == history.Append {
 				mops[j].App = next
 				next++

@@ -13,7 +13,7 @@ import (
 	"github.com/syed-imam/elle-go/history"
 )
 
-func openTestDB(t *testing.T) *sql.DB {
+func openTestDB(t *testing.T, keys ...string) *sql.DB {
 	dsn := os.Getenv("ELLE_PG")
 	if dsn == "" {
 		t.Skip("set ELLE_PG to a disposable Postgres DSN to run")
@@ -24,7 +24,7 @@ func openTestDB(t *testing.T) *sql.DB {
 	}
 	t.Cleanup(func() { db.Close() })
 	ctx := context.Background()
-	if err := Setup(ctx, db); err != nil {
+	if err := Setup(ctx, db, keys); err != nil {
 		t.Fatal(err)
 	}
 	return db
@@ -48,7 +48,7 @@ func TestExecAppendThenRead(t *testing.T) {
 }
 
 func TestRunSerializableIsClean(t *testing.T) {
-	db := openTestDB(t)
+	db := openTestDB(t, "x", "y", "z")
 	cfg := generator.Config{Keys: []string{"x", "y", "z"}, Txns: 300, MaxMops: 4}
 	h := Run(context.Background(), db, sql.LevelSerializable, generator.Invocations(cfg, 1), 8)
 	if len(h) != cfg.Txns {
@@ -60,5 +60,21 @@ func TestRunSerializableIsClean(t *testing.T) {
 	}
 	if v.Anomaly != anomaly.None {
 		t.Fatalf("SERIALIZABLE produced an anomaly: %v", v)
+	}
+}
+
+func TestLockedWriteSkewIsClean(t *testing.T) {
+	db := openTestDB(t, "alice", "bob")
+	shapes := []history.Op{
+		{Mops: []history.Mop{{Type: history.Read, Key: "alice", Lock: true}, {Type: history.Read, Key: "bob", Lock: true}, {Type: history.Append, Key: "alice"}}},
+		{Mops: []history.Mop{{Type: history.Read, Key: "alice", Lock: true}, {Type: history.Read, Key: "bob", Lock: true}, {Type: history.Append, Key: "bob"}}},
+	}
+	h := Run(context.Background(), db, sql.LevelReadCommitted, generator.FromShapes(shapes, 100, 1), 8)
+	v, err := checker.Check(h)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v.Anomaly != anomaly.None {
+		t.Fatalf("FOR UPDATE at READ COMMITTED produced an anomaly: %v", v)
 	}
 }

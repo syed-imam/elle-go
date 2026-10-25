@@ -19,13 +19,14 @@ You turn the user's transactional code into **shapes**, the user confirms them, 
 A shape is one transaction type: an ordered list of operations on **row keys**.
 
 - Reading a row (`SELECT`, ORM `find` or `get`) → `{"type": "r", "key": "<table>:<id>"}`
+- Reading a row with `SELECT ... FOR UPDATE` or `FOR NO KEY UPDATE` (ORM `lock`, `select_for_update`, `@Lock(PESSIMISTIC_WRITE)`) → `{"type": "r", "key": "<table>:<id>", "lock": true}`
 - Writing a row (`UPDATE`, `INSERT`, `DELETE`, ORM `save`, `update`) → `{"type": "append", "key": "<table>:<id>"}`
 - Keep the order the code performs them in.
 - Use a **small set of concrete ids** so transactions collide. For example, `transfer(from, to)` becomes two shapes, `account:1 → account:2` and `account:2 → account:1`. Contention is what exposes anomalies.
 
 Stop and tell the user the check would be unsound, rather than guessing, when the code:
 - reads by **predicate or range** (`WHERE balance > 0`, `COUNT(*)`, `SELECT ... WHERE date BETWEEN`). Phantoms are not modeled.
-- relies on **explicit locks** (`SELECT ... FOR UPDATE`, advisory locks). The analog does not take locks yet, so it would report anomalies the locks prevent.
+- relies on **locks other than row-level `FOR UPDATE`** (`FOR SHARE`, advisory locks, `LOCK TABLE`). These aren't modeled, so the check would report anomalies the locks prevent.
 - picks which rows to touch **based on values it read**, in a way that fixed ids can't represent.
 
 ## 3. Confirm with the user

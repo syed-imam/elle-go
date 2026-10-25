@@ -36,7 +36,7 @@ func TestParityPostgres(t *testing.T) {
 			t.Fatal(err)
 		}
 		for seed := int64(0); seed < 3; seed++ {
-			if err := pgrun.Setup(ctx, db); err != nil {
+			if err := pgrun.Setup(ctx, db, cfg.Keys); err != nil {
 				t.Fatal(err)
 			}
 			h := pgrun.Run(ctx, db, iso, generator.Invocations(cfg, seed), 8)
