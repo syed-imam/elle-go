@@ -1,0 +1,4 @@
+[
+  {"mops": [{"type": "r", "key": "doctor:alice", "lock": true}, {"type": "r", "key": "doctor:bob", "lock": true}, {"type": "append", "key": "doctor:alice"}]},
+  {"mops": [{"type": "r", "key": "doctor:alice", "lock": true}, {"type": "r", "key": "doctor:bob", "lock": true}, {"type": "append", "key": "doctor:bob"}]}
+]

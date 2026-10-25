@@ -29,3 +29,13 @@ func TestUnknownTypeRejected(t *testing.T) {
 		t.Fatal("expected error for unknown mop type")
 	}
 }
+
+func TestLockedReadJSON(t *testing.T) {
+	var m Mop
+	if err := json.Unmarshal([]byte(`{"type":"r","key":"x","lock":true}`), &m); err != nil {
+		t.Fatal(err)
+	}
+	if m.Type != Read || !m.Lock {
+		t.Fatalf("decoded %+v, want a locked read", m)
+	}
+}

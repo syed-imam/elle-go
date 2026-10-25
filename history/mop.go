@@ -12,4 +12,5 @@ type Mop struct {
 	Key  string  `json:"key"`
 	App  int     `json:"app"`
 	Read []int   `json:"read"`
+	Lock bool    `json:"lock,omitempty"`
 }

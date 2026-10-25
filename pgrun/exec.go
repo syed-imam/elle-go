@@ -15,12 +15,19 @@ const schema = `CREATE TABLE IF NOT EXISTS elle_lists (key text PRIMARY KEY, val
 const appendSQL = `INSERT INTO elle_lists (key, vals) VALUES ($1, ARRAY[$2::int])
 ON CONFLICT (key) DO UPDATE SET vals = elle_lists.vals || $2::int`
 
-func Setup(ctx context.Context, db *sql.DB) error {
+func Setup(ctx context.Context, db *sql.DB, keys []string) error {
 	if _, err := db.ExecContext(ctx, schema); err != nil {
 		return err
 	}
-	_, err := db.ExecContext(ctx, `TRUNCATE elle_lists`)
-	return err
+	if _, err := db.ExecContext(ctx, `TRUNCATE elle_lists`); err != nil {
+		return err
+	}
+	for _, k := range keys {
+		if _, err := db.ExecContext(ctx, `INSERT INTO elle_lists (key, vals) VALUES ($1, '{}')`, k); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func Exec(ctx context.Context, db *sql.DB, iso sql.IsolationLevel, op history.Op) history.Op {
@@ -36,7 +43,7 @@ func Exec(ctx context.Context, db *sql.DB, iso sql.IsolationLevel, op history.Op
 		if m.Type == history.Append {
 			_, err = tx.ExecContext(ctx, appendSQL, m.Key, m.App)
 		} else {
-			mops[i].Read, err = readList(ctx, tx, m.Key)
+			mops[i].Read, err = readList(ctx, tx, m.Key, m.Lock)
 		}
 		if err != nil {
 			return done
@@ -48,9 +55,13 @@ func Exec(ctx context.Context, db *sql.DB, iso sql.IsolationLevel, op history.Op
 	return history.Op{Process: op.Process, Type: history.Ok, Mops: mops}
 }
 
-func readList(ctx context.Context, tx *sql.Tx, key string) ([]int, error) {
+func readList(ctx context.Context, tx *sql.Tx, key string, lock bool) ([]int, error) {
+	query := `SELECT vals FROM elle_lists WHERE key = $1`
+	if lock {
+		query += ` FOR UPDATE`
+	}
 	var vals pgtype.FlatArray[int]
-	err := tx.QueryRowContext(ctx, `SELECT vals FROM elle_lists WHERE key = $1`, key).Scan(&vals)
+	err := tx.QueryRowContext(ctx, query, key).Scan(&vals)
 	if err == sql.ErrNoRows {
 		return []int{}, nil
 	}

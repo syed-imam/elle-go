@@ -54,3 +54,13 @@ func (g *Graph) SCCs() [][]int {
 func (g *Graph) HasCycle() bool {
 	return g.FindCycle() != nil
 }
+
+func (g *Graph) Components() map[int]int {
+	comp := map[int]int{}
+	for i, c := range g.SCCs() {
+		for _, n := range c {
+			comp[n] = i
+		}
+	}
+	return comp
+}

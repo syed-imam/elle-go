@@ -91,7 +91,11 @@ func newVerdict(a Anomaly, cycle []int) Verdict {
 }
 
 func closingCycle(g *graph.Graph, via graph.Rel) []int {
+	comp := g.Filter(graph.WW | graph.WR | via).Components()
 	for _, e := range g.EdgesWith(via) {
+		if comp[e[0]] != comp[e[1]] {
+			continue
+		}
 		if p := g.Path(e[1], e[0], graph.WW|graph.WR); p != nil {
 			return append([]int{e[0]}, p[:len(p)-1]...)
 		}

@@ -215,3 +215,18 @@ func TestFinishOrder(t *testing.T) {
 		}
 	}
 }
+
+func TestComponents(t *testing.T) {
+	g := New()
+	g.AddEdge(1, 2, WW)
+	g.AddEdge(2, 1, WW)
+	g.AddEdge(2, 3, WW)
+
+	comp := g.Components()
+	if comp[1] != comp[2] {
+		t.Errorf("1 and 2 in different components: %v", comp)
+	}
+	if comp[1] == comp[3] {
+		t.Errorf("3 shares a component with 1: %v", comp)
+	}
+}
